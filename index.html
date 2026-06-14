@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e9e3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sober Journey">
+<title>Sober Journey — MVP</title>
+<!-- PostHog Analytics -->
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init('phc_n7hb7rUebgUpHepxwY6c2ZzFiF8KhgMnZZjX2embetRG', {
+  api_host: 'https://app.posthog.com',
+  session_recording: { maskAllInputs: true },
+  autocapture: false
+});
+</script>
+<style>
+/* ── LANDSCAPE LOCK ── */
+@media screen and (orientation:landscape) and (max-height:500px) {
+  body::before {
+    content: 'Please rotate your phone to portrait mode';
+    position: fixed; inset: 0; z-index: 99999;
+    background: #1e9e3e; color: white;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 17px; font-weight: 600; text-align: center; padding: 40px;
+  }
+  body > * { display: none !important; }
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+/* ── TOKENS ── */
+:root {
+  --green-deep:   #1B5E20;
+  --green:        #388E3C;
+  --green-light:  #4CAF50;
+  --green-mist:   rgba(56,142,60,0.08);
+  --green-ring:   rgba(56,142,60,0.18);
+  --red:          #EF5350;
+  --red-mist:     rgba(239,83,80,0.08);
+  --amber:        #FF8F00;
+  --amber-mist:   rgba(255,143,0,0.10);
+  --surface:      #FFFFFF;
+  --bg:           #F4F6F4;
+  --label:        #1A1A1A;
+  --label2:       #5A5A5A;
+  --label3:       #9E9E9E;
+  --divider:      rgba(0,0,0,0.07);
+  --shadow-sm:    0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --radius-card:  18px;
+  --radius-btn:   14px;
+}
+
+html { -webkit-overflow-scrolling:touch; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--label);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── LAYOUT ── */
+.shell {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 16px calc(60px + env(safe-area-inset-bottom));
+}
+
+/* ── HEADER ── */
+.app-journey-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label3);
+}
+
+@keyframes floatUp {
+  0%   { opacity:1; transform:translateX(-50%) translateY(0) scale(1.1); }
+  100% { opacity:0; transform:translateX(-50%) translateY(-44px) scale(0.9); }
+}
+.score-float {
+  position: fixed;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--label);
+  pointer-events: none;
+  z-index: 9999;
+  line-height: 1;
+  transform: translateX(-50%);
+  animation: floatUp 0.75s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+
+@keyframes whyPulse {
+  0%   { transform: scale(1);    box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  50%  { transform: scale(1.02); box-shadow: 0 4px 16px rgba(239,83,80,0.25); }
+  100% { transform: scale(1);    box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+}
+
+
+.top-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.day-cell {
+  background: rgba(76,175,80,0.10);
+  border: 1.5px solid rgba(76,175,80,0.28);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px 6px;
+}
+.day-cell-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-light);
+}
+.day-cell-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--green-light);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.best-cell {
+  background: rgba(255,143,0,0.09);
+  border: 1.5px solid rgba(255,143,0,0.25);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.best-cell::after {
+  content: '🏆';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 32px;
+  opacity: 0.10;
+}
+.best-cell-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.best-cell-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--amber);
+  line-height: 1;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.best-cell-empty {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label3);
+}
+
+/* ── SCORE HERO ── */
+.score-hero {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  padding: 22px 24px 20px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.score-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--green-light);
+}
+.score-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--label3);
+  margin-bottom: 10px;
+}
+.score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.score-sober {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -3px;
+  color: var(--green-light);
+  font-variant-numeric: tabular-nums;
+}
+.score-sep {
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--label3);
+  letter-spacing: 0;
+}
+.score-drink {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: var(--label3);
+  font-variant-numeric: tabular-nums;
+}
+.score-sublabel {
+  font-size: 12px;
+  color: var(--label3);
+}
+.score-sublabel span { color: var(--label2); font-weight: 600; }
+
+.score-hero.inactive {
+  background: linear-gradient(135deg, rgba(60,60,67,0.06), rgba(60,60,67,0.03));
+  box-shadow: none;
+  border: 1.5px solid rgba(60,60,67,0.15);
+}
+.score-hero.inactive::before { background: var(--label3); }
+.score-hero.inactive .score-sober { color: var(--label3); }
+.score-hero.inactive .score-sep   { color: var(--label3); }
+.score-hero.inactive .score-label { color: var(--label3); }
+.score-hero.inactive::after {
+  content: 'Journey Complete — New journey starts tomorrow';
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--label3);
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--divider);
+  letter-spacing: 0.02em;
+}
+
+
+.chances-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+}
+.chances-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.chances-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label3); }
+.chances-remaining { font-size: 13px; font-weight: 700; color: var(--label2); }
+.chances-remaining span { color: var(--green-light); }
+.chances-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+}
+.chance-pip {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--red-mist);
+  border: 1.5px solid rgba(239,83,80,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.chance-pip.used {
+  background: rgba(0,0,0,0.04);
+  border-color: transparent;
+  font-size: 10px;
+  opacity: 0.3;
+}
+
+/* ── BUTTONS ── */
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn {
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-sober {
+  background: linear-gradient(180deg, #5CC85E 0%, #3DA83F 100%);
+  color: white;
+  box-shadow: 0 4px 0px #2D8A2F, 0 6px 16px rgba(61,168,63,0.4);
+  border: none;
+  border-bottom: none;
+}
+.btn-sober.logged {
+  background: rgba(56,142,60,0.18);
+  color: var(--green);
+  box-shadow: none;
+  border: 1.5px solid rgba(56,142,60,0.35);
+  opacity: 1 !important;
+}
+.btn-drink {
+  background: linear-gradient(180deg, #F28B82 0%, #E57373 100%);
+  color: white;
+  box-shadow: 0 4px 0px #C15B5B, 0 6px 16px rgba(229,115,115,0.35);
+  border: none;
+}
+.btn-drink.logged {
+  background: rgba(229,115,115,0.10);
+  color: #E57373;
+  border: 1.5px solid rgba(229,115,115,0.25);
+  box-shadow: none;
+  opacity: 1 !important;
+}
+.btn:active:not(:disabled) { transform: scale(0.97) translateY(2px); opacity: 0.9; box-shadow: none !important; }
+.btn-icon { font-size: 16px; }
+
+/* ── MILESTONES CARD ── */
+.milestones-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+/* tab bar */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--divider);
+  padding: 0 20px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  color: var(--green);
+  font-weight: 700;
+  border-bottom-color: var(--green-light);
+}
+.tab-panel { display: none; padding: 8px 20px 16px; }
+.tab-panel.active { display: block; }
+
+/* streak rows */
+.streak-row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 12px;
+  border-bottom: 1px solid var(--divider);
+  padding: 8px 0;
+}
+.streak-row:last-child { border-bottom: none; }
+.streak-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+.streak-name { font-size: 14px; color: var(--label); flex: 1; }
+.streak-name.done { color: var(--green); font-weight: 600; }
+.streak-stat { font-size: 12px; font-weight: 600; color: var(--label3); min-width: 36px; text-align: right; }
+.streak-stat.done { color: var(--green); }
+.streak-stat.next { color: var(--amber); }
+
+/* achieved — currently in active streak */
+.streak-row.milestone-active {
+  background: rgba(76,175,80,0.12);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 2px -10px;
+  border-bottom: none;
+}
+.streak-row.milestone-active .streak-name { color: var(--green); font-weight: 700; }
+.streak-row.milestone-active .streak-stat { color: var(--green); font-weight: 700; }
+
+
+.streak-row.pb-row { background: var(--amber-mist); border-radius: 10px; padding: 10px 10px; margin: 4px -10px; border-bottom: none; }
+.pb-row .streak-name { color: var(--amber); font-weight: 700; }
+.pb-row .streak-stat { color: var(--amber); font-weight: 700; }
+
+/* journey trophy rows */
+.trophy-row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 12px;
+  border-bottom: 1px solid var(--divider);
+  padding: 8px 0;
+}
+.trophy-row:last-child { border-bottom: none; }
+.trophy-row.active-trophy { background: var(--green-mist); border-radius: 10px; padding: 10px 10px; margin: 4px -10px; border-bottom: none; }
+.trophy-row.active-trophy .trophy-name { color: var(--green); font-weight: 700; }
+.trophy-row.active-trophy .trophy-stat { color: var(--green); font-weight: 700; }
+.trophy-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+.trophy-name { font-size: 14px; color: var(--label); flex: 1; }
+.trophy-stat { font-size: 12px; font-weight: 600; color: var(--label3); min-width: 36px; text-align: right; }
+
+/* locked trophy rows */
+.trophy-row.locked {
+  opacity: 0.38;
+}
+.trophy-row.locked .trophy-icon { filter: grayscale(1); }
+.trophy-locked-hint {
+  font-size: 11px;
+  color: var(--label3);
+  text-align: center;
+  padding: 10px 0 6px;
+  font-style: italic;
+}
+.taking-control-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 0 6px;
+  color: var(--green);
+}
+.taking-control-label.locked-label { color: var(--label3); }
+
+/* ── AUDIT METER CARD ── */
+.meter-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  padding: 20px 20px 16px;
+  margin-bottom: 10px;
+}
+.meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.meter-title { font-size: 13px; font-weight: 700; color: var(--label); }
+.meter-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--label3);
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 4px 9px;
+}
+.meter-svg-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+.meter-cta {
+  display: flex;
+  justify-content: center;
+}
+.btn-assess {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 22px;
+  padding: 10px 24px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 40px;
+  box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+}
+.btn-assess:active { opacity: 0.7; transform: scale(0.97); }
+.meter-feedback {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--label2);
+}
+
+/* ── RESET BTN ── */
+.reset-wrap {
+  padding: 8px 0 4px;
+  text-align: center;
+}
+.btn-reset {
+  background: none;
+  border: 1px solid rgba(239,83,80,0.2);
+  border-radius: 12px;
+  padding: 11px 20px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(239,83,80,0.5);
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+.btn-reset:active { opacity: 0.7; }
+
+/* ── MODALS ── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  pointer-events: none;
+}
+.modal-backdrop.open { display: flex; pointer-events: all; }
+
+.modal-box {
+  background: var(--surface);
+  border-radius: 18px;
+  max-width: 310px;
+  width: 100%;
+  overflow: hidden;
+  animation: modalPop 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalPop {
+  from { opacity:0; transform:scale(0.92); }
+  to   { opacity:1; transform:scale(1); }
+}
+.modal-body { padding: 24px 20px 16px; text-align: center; }
+.modal-emoji { font-size: 44px; margin-bottom: 10px; }
+.modal-title { font-size: 17px; font-weight: 700; color: var(--label); margin-bottom: 6px; }
+.modal-msg { font-size: 14px; color: var(--label2); line-height: 1.6; white-space: pre-line; }
+.modal-divider { height: 1px; background: var(--divider); }
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; }
+.modal-actions.single { grid-template-columns: 1fr; }
+.modal-action {
+  padding: 15px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  color: #007AFF;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+.modal-action:active { background: var(--bg); }
+.modal-action.bold { font-weight: 700; border-left: 1px solid var(--divider); }
+.modal-action.red { color: var(--red); }
+
+.celebration-box {
+  background: var(--surface);
+  border-radius: 18px;
+  max-width: 310px;
+  width: 100%;
+  padding: 28px 24px 24px;
+  text-align: center;
+  animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+.celeb-emoji { font-size: 52px; display: block; animation: bounce 0.5s ease; margin-bottom: 12px; }
+.celeb-title { font-size: 20px; font-weight: 800; color: var(--green); margin-bottom: 8px; }
+.celeb-msg { font-size: 14px; color: var(--label2); line-height: 1.6; white-space: pre-line; margin-bottom: 24px; }
+.celeb-btn {
+  width: 100%;
+  height: 50px;
+  background: var(--green-light);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green-light);
+  color: white;
+  padding: 11px 20px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 300px;
+  width: calc(100% - 48px);
+  text-align: center;
+  z-index: 9000;
+  opacity: 0;
+  transition: bottom 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+  pointer-events: none;
+}
+.toast.show {
+  bottom: calc(128px + env(safe-area-inset-bottom));
+  opacity: 1;
+}
+
+/* ── CONFETTI ── */
+.confetti-layer { position:fixed;inset:0;pointer-events:none;z-index:300;overflow:hidden; }
+@keyframes confFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1;} 100%{transform:translateY(110vh) rotate(720deg);opacity:0;} }
+.cp { position:absolute;border-radius:2px;animation:confFall linear forwards; }
+
+/* ── AUDIT MODAL ── */
+.audit-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 150;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+.audit-backdrop.open { display: flex; pointer-events: all; }
+.audit-sheet {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 420px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.audit-drag { width:36px;height:4px;background:#E0E0E0;border-radius:2px;margin:0 auto 20px; }
+.audit-q { font-size:15px;font-weight:700;color:var(--label);margin-bottom:4px; }
+.audit-q-hi { font-size:12px;color:var(--label2);font-weight:500;margin-bottom:16px; }
+.audit-opts { display:flex;flex-direction:column;gap:8px; }
+.audit-opt {
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1.5px solid var(--divider);
+  background:var(--bg);
+  cursor:pointer;
+  font-family:inherit;
+  font-size:14px;
+  color:var(--label);
+  text-align:left;
+  transition:all 0.15s ease;
+}
+.audit-opt.selected {
+  background: var(--bg);
+  border-color: var(--label2);
+  font-weight: 700;
+  color: var(--label);
+}
+.audit-opt:disabled { opacity:0.25;cursor:not-allowed; }
+.audit-badge {
+  min-width:22px;height:22px;border-radius:11px;
+  background:rgba(0,0,0,0.06);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--label3);flex-shrink:0;
+}
+.audit-opt.selected .audit-badge { background:rgba(0,0,0,0.08);color:var(--label2); }
+.audit-hint { margin-left:auto;font-size:11px;color:var(--label2);font-weight:500; }
+.audit-next {
+  width:100%;height:50px;background:var(--green-light);border:none;border-radius:14px;
+  font-family:inherit;font-size:15px;font-weight:700;color:white;
+  margin-top:20px;cursor:pointer;opacity:0.35;
+  transition:opacity 0.2s ease;
+}
+.audit-step-dots { display:flex;gap:6px;margin-bottom:20px; }
+.step-dot { width:8px;height:8px;border-radius:50%;background:#E0E0E0;transition:background 0.3s; }
+.step-dot.on { background:var(--green-light); }
+.audit-def {
+  background:var(--amber-mist);
+  border:1px solid rgba(255,143,0,0.25);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:14px;
+}
+.audit-def-title { font-size:13px;font-weight:700;color:var(--amber);margin-bottom:2px; }
+.audit-def-sub { font-size:11px;color:var(--label2);font-weight:500; }
+
+/* ── YESTERDAY MODAL ── */
+.yest-actions { display:grid;grid-template-columns:1fr 1fr; }
+.yest-sober { color:var(--green) !important;font-weight:700 !important; }
+.yest-drink { color:var(--red) !important; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+.top-row        { animation:fadeUp 0.35s ease both; }
+.score-hero     { animation:fadeUp 0.35s ease 0.05s both; }
+.chances-card   { animation:fadeUp 0.35s ease 0.10s both; }
+.action-row     { animation:fadeUp 0.35s ease 0.14s both; }
+.milestones-card{ animation:fadeUp 0.35s ease 0.18s both; }
+.meter-card     { animation:fadeUp 0.35s ease 0.22s both; }
+
+
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding" style="position:fixed;inset:0;background:#1e9e3e;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
+
+<!-- SPLASH OVERLAY — shown briefly on every open -->
+<div id="splashOverlay" style="position:absolute;inset:0;background:#1e9e3e;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity 0.4s ease;">
+  <div style="font-size:80px;line-height:1;margin-bottom:18px;animation:leafIn 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards;">🍃</div>
+  <div style="font-size:20px;font-weight:800;color:white;letter-spacing:-0.4px;animation:fadeUpSplash 0.4s ease 0.35s both;">Sober Journey</div>
+</div>
+
+<style>
+@keyframes leafIn { 0%{transform:translateY(14px) scale(0.85);opacity:0;} 60%{transform:translateY(-5px) scale(1.05);opacity:1;} 100%{transform:translateY(0) scale(1);opacity:1;} }
+@keyframes fadeUpSplash { 0%{opacity:0;transform:translateY(8px);} 100%{opacity:1;transform:translateY(0);} }
+</style>
+
+  <div style="width:100%;max-width:360px;flex:1;display:flex;flex-direction:column;justify-content:center;">
+
+    <!-- Slide 0 — The mechanic (original slide 1) -->
+    <div id="ob-slide-0">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.55);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Control it. Or quit it. Your journey.</div>
+      <div style="font-size:20px;font-weight:700;color:white;line-height:1.65;margin-bottom:16px;">
+        You get <span style="background:rgba(255,255,255,0.15);border-radius:6px;padding:2px 9px;color:#b6ffce;">10 Drinking Days</span> per Journey.<br>
+        Log one when you drink.<br>
+        Every sober day adds to your Score.
+      </div>
+
+      <div style="background:rgba(0,0,0,0.2);border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+        <div style="padding:8px 18px;background:rgba(255,255,255,0.06);">
+          <span style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);letter-spacing:0.2px;">Example</span>
+        </div>
+        <div style="padding:20px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:rgba(52,199,89,0.18);border-radius:16px;padding:16px 16px 14px;">
+              <div style="font-size:32px;margin-bottom:8px;">☀️</div>
+              <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.45);margin-bottom:4px;">Sober days</div>
+              <div style="font-size:44px;font-weight:800;color:#b6ffce;letter-spacing:-2px;line-height:1;">60</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:16px;padding:16px 16px 14px;">
+              <div style="font-size:32px;margin-bottom:8px;">🍺</div>
+              <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.45);margin-bottom:4px;">Drinking days used</div>
+              <div style="display:flex;align-items:baseline;gap:2px;">
+                <div style="font-size:44px;font-weight:800;color:rgba(255,255,255,0.45);letter-spacing:-2px;line-height:1;">10</div>
+                <div style="font-size:16px;font-weight:600;color:rgba(255,255,255,0.2);padding-bottom:6px;">/10</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:rgba(255,208,0,0.12);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,208,0,0.18);display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:4px;letter-spacing:0.2px;">Score</div>
+              <div style="font-size:56px;font-weight:800;color:#ffd060;letter-spacing:-3px;line-height:1;">60</div>
+            </div>
+            <div style="font-size:48px;line-height:1;opacity:0.6;">🏆</div>
+          </div>
+        </div>
+        <div style="padding:15px 18px;background:rgba(52,199,89,0.15);border-top:1px solid rgba(52,199,89,0.15);">
+          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:4px;letter-spacing:0.2px;">Next Journey</div>
+          <div style="font-size:18px;font-weight:800;color:white;letter-spacing:-0.3px;">🎯 Can you go beyond 60?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 1 — Daily action (original slide 2) -->
+    <div id="ob-slide-1" style="display:none;">
+      <div style="font-size:28px;font-weight:800;color:white;line-height:1.2;margin-bottom:28px;letter-spacing:-0.5px;">Did you drink<br>today?</div>
+
+      <div style="width:100%;background:rgba(52,199,89,0.35);border:2px solid rgba(52,199,89,0.7);border-radius:16px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;">
+        <div style="font-size:36px;flex-shrink:0;">☀️</div>
+        <div>
+          <div style="font-size:17px;font-weight:800;color:white;margin-bottom:2px;">I Did Not Drink Today</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.75);">Add 1 Sober Day to your score</div>
+        </div>
+      </div>
+
+      <div style="width:100%;background:rgba(255,59,48,0.15);border:1.5px solid rgba(255,59,48,0.35);border-radius:16px;padding:18px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;">
+        <div style="font-size:36px;flex-shrink:0;">🥃</div>
+        <div>
+          <div style="font-size:17px;font-weight:800;color:white;margin-bottom:2px;">I Drank Today</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.65);">Use 1 Drinking Day</div>
+        </div>
+      </div>
+
+      <div style="font-size:22px;font-weight:800;color:white;letter-spacing:-0.5px;">That's it.</div>
+    </div>
+
+  </div>
+
+  <!-- Dots -->
+  <div style="display:flex;gap:8px;margin:32px 0 28px;">
+    <div id="ob-dot-0" style="width:24px;height:8px;border-radius:4px;background:white;transition:all 0.3s ease;"></div>
+    <div id="ob-dot-1" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s ease;"></div>
+  </div>
+
+  <div style="width:100%;max-width:360px;">
+    <button id="obNextBtn" onclick="Ob.next()" style="width:100%;height:52px;background:white;border:none;border-radius:16px;font-size:17px;font-weight:700;color:#1e9e3e;cursor:pointer;font-family:inherit;margin-bottom:10px;">Next</button>
+    <button onclick="Ob.skip()" style="width:100%;min-height:44px;background:transparent;border:none;font-size:14px;font-weight:500;color:rgba(255,255,255,0.45);cursor:pointer;font-family:inherit;">Skip</button>
+  </div>
+
+</div>
+
+<style>
+@keyframes slideInRight { from{opacity:0;transform:translateX(28px);} to{opacity:1;transform:translateX(0);} }
+@keyframes slideOutLeft  { from{opacity:1;transform:translateX(0);} to{opacity:0;transform:translateX(-28px);} }
+</style>
+
+<div class="shell">
+
+  <!-- TOP ROW: day + best -->
+  <div style="display:flex;justify-content:flex-end;padding:52px 0 6px;">
+    <div id="journeyBadge" style="font-size:11px;font-weight:700;color:var(--label3);">Journey 1</div>
+  </div>
+  <div class="top-row">
+    <div class="day-cell">
+      <div class="day-cell-label">Day</div>
+      <div class="day-cell-value" id="calDay">1</div>
+    </div>
+    <div class="best-cell" id="bestCell">
+      <div class="best-cell-label">🏆 Best Score</div>
+      <div class="best-cell-value" id="bestScore" style="display:none;">0 – 0</div>
+      <div class="best-cell-empty" id="bestEmpty">—</div>
+    </div>
+  </div>
+
+  <!-- SCORE HERO -->
+  <div class="score-hero" style="text-align:center;">
+    <div class="score-label">Current Journey</div>
+    <div class="score-display" style="justify-content:center;">
+      <div class="score-sober" id="scoreSober">0</div>
+      <div class="score-sep">–</div>
+      <div class="score-drink" id="scoreDrink">0</div>
+    </div>
+    <div class="score-sublabel">
+      <span id="soberLabel">0 sober days</span> &nbsp;·&nbsp; <span id="drinkLabel">0 drinking days</span>
+    </div>
+  </div>
+
+  <!-- CHANCES -->
+  <div class="chances-card">
+    <div class="chances-top">
+      <div class="chances-title">Drinking Days Left</div>
+      <div class="chances-remaining"><span id="chancesLeft">10</span> of 10 remaining</div>
+    </div>
+    <div class="chances-grid" id="chancesGrid"></div>
+  </div>
+
+  <!-- EVENING REMINDER BANNER -->
+  <div id="eveningBanner" style="display:none;background:linear-gradient(135deg,#1B5E20,#2E7D32);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 4px 16px rgba(27,94,32,0.3);">
+    <div style="font-size:13px;font-weight:700;color:white;margin-bottom:10px;">🌙 Evening check-in — how did today go?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="App.quickLog('sober')" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.35);border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:inherit;min-height:44px;">☀️ Sober</button>
+      <button onclick="App.quickLog('drink')" style="background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:rgba(255,255,255,0.75);cursor:pointer;font-family:inherit;min-height:44px;">🥃 Drank</button>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="action-row">
+    <button class="btn btn-sober" id="soberBtn" onclick="App.handleSober()">
+      <span class="btn-icon">☀️</span> Did Not Drink
+    </button>
+    <button class="btn btn-drink" id="drinkBtn" onclick="App.showConfirm('drink')">
+      <span class="btn-icon">🥃</span> I Drank
+    </button>
+  </div>
+
+  <!-- MILESTONES -->
+  <div class="milestones-card">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="App.tab(0,this)">Streak</button>
+      <button class="tab-btn" onclick="App.tab(1,this)">Journey</button>
+    </div>
+
+    <!-- Streak Tab -->
+    <div class="tab-panel active" id="tab0">
+      <div style="padding:10px 0 8px;font-size:12px;font-weight:500;color:var(--label3);font-style:italic;">How many days without a drink?</div>
+      <div id="streakRows"></div>
+    </div>
+
+    <!-- Journey Tab -->
+    <div class="tab-panel" id="tab1">
+      <div style="padding:10px 0 8px;font-size:12px;font-weight:500;color:var(--label3);font-style:italic;">How many sober days against 10 drinking days?</div>
+      <div id="trophyRows"></div>
+    </div>
+  </div>
+
+  <!-- AUDIT METER -->
+  <div style="background:white;border-radius:18px;box-shadow:0 4px 16px rgba(0,0,0,0.08),0 0 0 1px rgba(0,0,0,0.04);margin-bottom:10px;">
+    <div style="padding:20px 20px 0;">
+      <div class="meter-header">
+        <div class="meter-title">Drinking Risk</div>
+        <div class="meter-badge">AUDIT-C · WHO</div>
+      </div>
+    </div>
+    <div style="padding:0 8px;">
+      <svg id="meterSvg" role="img" aria-label="AUDIT-C risk meter" width="100%" viewBox="-60 0 400 178" style="max-width:360px;display:block;overflow:visible;margin:0 auto;"></svg>
+    </div>
+    <div style="padding:0 20px 20px;">
+      <div class="meter-cta">
+        <button class="btn-assess" onclick="Audit.show()" id="assessBtn">Take the Test</button>
+      </div>
+      <div class="meter-feedback" id="meterFeedback"></div>
+      <!-- Why this zone -->
+      <div id="whyZoneWrap" style="display:none;margin-top:12px;">
+        <button onclick="toggleWhyZone()" id="whyZoneBtn"
+          style="width:100%;background:#E5E5EA;border:1.5px solid rgba(60,60,67,0.18);border-radius:12px;
+          padding:13px 16px;font-size:13px;font-weight:600;color:var(--label);cursor:pointer;
+          font-family:inherit;display:flex;align-items:center;justify-content:space-between;
+          min-height:48px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:17px;">🔬</span>
+            <span>What does this zone mean for my body?</span>
+          </span>
+          <span id="whyZoneArrow" style="font-size:18px;color:var(--label2);">▸</span>
+        </button>
+        <div id="whyZoneContent" style="display:none;margin-top:8px;padding:4px 10px;border-radius:12px;border:1px solid rgba(60,60,67,0.08);background:white;box-shadow:0 1px 4px rgba(0,0,0,0.05);color:var(--label);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESET -->
+  <div class="reset-wrap">
+    <button class="btn-reset" onclick="App.clearAll()">🗑 Clear all data</button>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- CONFIRM -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-body">
+      <div class="modal-title" id="confirmTitle">Are you sure?</div>
+      <div class="modal-msg" id="confirmMsg"></div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-actions">
+      <button class="modal-action" onclick="App.closeConfirm()">Cancel</button>
+      <button class="modal-action bold" id="confirmOkBtn" onclick="App.doConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACKNOWLEDGE (drink logged) -->
+<div class="modal-backdrop" id="ackModal">
+  <div class="modal-box">
+    <div class="modal-body">
+      <div class="modal-emoji">🥃</div>
+      <div class="modal-title">Logged.</div>
+      <div class="modal-msg">Journey continues.<br>Keep moving forward.</div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-actions single">
+      <button class="modal-action bold" onclick="App.closeAck()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- YESTERDAY -->
+<div class="modal-backdrop" id="yesterdayModal">
+  <div class="modal-box">
+    <div class="modal-body">
+      <div class="modal-emoji">📅</div>
+      <div class="modal-title">Yesterday — did you drink?</div>
+      <div class="modal-msg">You didn't log yesterday.</div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-actions yest-actions">
+      <button class="modal-action yest-sober" onclick="App.logYesterday('sober')">☀️ Sober</button>
+      <button class="modal-action bold red yest-drink" onclick="App.logYesterday('drink')">🥃 Drank</button>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATION -->
+<div class="modal-backdrop" id="celebModal">
+  <div class="celebration-box">
+    <span class="celeb-emoji" id="celebEmoji">🎉</span>
+    <div class="celeb-title" id="celebTitle">Amazing!</div>
+    <div class="celeb-msg" id="celebMsg">Keep going.</div>
+    <button class="celeb-btn" onclick="App.closeCeleb()">Continue →</button>
+  </div>
+</div>
+
+<!-- JOURNEY ENDED -->
+<div class="modal-backdrop" id="journeyEndModal">
+  <div class="modal-box" style="max-width:340px;">
+    <div style="padding:24px 20px 16px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:8px;">🔄</div>
+      <div style="font-size:18px;font-weight:800;color:var(--label);margin-bottom:4px;" id="jEndTitle">Journey Complete</div>
+      <div style="font-size:13px;color:var(--label3);margin-bottom:20px;" id="jEndSubtitle"></div>
+
+      <!-- Score comparison grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);border-radius:12px;padding:14px 10px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--label3);margin-bottom:6px;">This Journey</div>
+          <div style="font-size:36px;font-weight:800;color:var(--green-light);letter-spacing:-1px;line-height:1;" id="jEndSober">—</div>
+          <div style="font-size:11px;color:var(--label3);margin-top:3px;">sober days</div>
+        </div>
+        <div style="background:rgba(255,143,0,0.08);border:1px solid rgba(255,143,0,0.2);border-radius:12px;padding:14px 10px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--label3);margin-bottom:6px;">Best Ever</div>
+          <div style="font-size:36px;font-weight:800;color:var(--amber);letter-spacing:-1px;line-height:1;" id="jEndBest">—</div>
+          <div style="font-size:11px;color:var(--label3);margin-top:3px;">sober days</div>
+        </div>
+      </div>
+
+      <!-- Verdict -->
+      <div style="background:rgba(60,60,67,0.05);border-radius:12px;padding:12px 14px;text-align:left;">
+        <div style="font-size:13px;color:var(--label);line-height:1.6;font-weight:500;" id="jEndVerdict">—</div>
+      </div>
+
+      <!-- Lifetime stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:14px;">
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--label);" id="jEndAttempts">—</div>
+          <div style="font-size:10px;color:var(--label3);margin-top:2px;">Journeys</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--green-light);" id="jEndTotalSober">—</div>
+          <div style="font-size:10px;color:var(--label3);margin-top:2px;">Total Sober</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:var(--label3);" id="jEndTotalDrink">—</div>
+          <div style="font-size:10px;color:var(--label3);margin-top:2px;">Total Drink</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-actions single">
+      <button class="modal-action bold" onclick="App.closeJourneyEnd()" id="jEndBtn">Start Journey 2 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT SHEET -->
+<div class="audit-backdrop" id="auditBackdrop">
+  <div class="audit-sheet">
+    <div class="audit-drag"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="audit-step-dots" style="margin-bottom:0;">
+        <div class="step-dot on" id="sdot1"></div>
+        <div class="step-dot" id="sdot2"></div>
+        <div class="step-dot" id="sdot3"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--label3);font-weight:600;">Risk level</span>
+        <span id="auditRunning" style="font-size:18px;font-weight:800;color:var(--label);min-width:28px;text-align:right;font-variant-numeric:tabular-nums;transition:color 0.3s ease;">0</span>
+        <span style="font-size:11px;color:var(--label3);">/ 12</span>
+      </div>
+    </div>
+    <div id="auditStep1">
+      <div class="audit-q">How often do you drink?</div>
+      <div class="audit-q-hi">आप कितनी बार शराब पीते हैं?</div>
+      <div class="audit-opts" id="q1opts">
+        <button class="audit-opt" data-val="0" onclick="Audit.pick(1,0)"><span class="audit-badge">0</span>Never<span class="audit-hint">कभी नहीं</span></button>
+        <button class="audit-opt" data-val="1" onclick="Audit.pick(1,1)"><span class="audit-badge">1</span>Monthly or less<span class="audit-hint">महीने में एक बार या कम</span></button>
+        <button class="audit-opt" data-val="2" onclick="Audit.pick(1,2)"><span class="audit-badge">2</span>2–4 times a month<span class="audit-hint">महीने में 2-4 बार</span></button>
+        <button class="audit-opt" data-val="3" onclick="Audit.pick(1,3)"><span class="audit-badge">3</span>2–3 times a week<span class="audit-hint">हफ़्ते में 2-3 बार</span></button>
+        <button class="audit-opt" data-val="4" onclick="Audit.pick(1,4)"><span class="audit-badge">4</span>4 or more times a week<span class="audit-hint">हफ़्ते में 4+ बार</span></button>
+      </div>
+    </div>
+    <div id="auditStep2" style="display:none">
+      <div class="audit-q">Pegs on a typical drinking day?</div>
+      <div class="audit-q-hi">एक सामान्य दिन कितने पेग?</div>
+      <div class="audit-def">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <div class="audit-def-title">1 drink = 1 peg = 30ml whisky = 10g alcohol</div>
+            <div class="audit-def-sub">1 ड्रिंक = 1 पेग = 30ml व्हिस्की = 10g अल्कोहल</div>
+          </div>
+          <button onclick="document.getElementById('beerInfoModal').classList.add('open')"
+            style="flex-shrink:0;background:linear-gradient(135deg,#FF8F00,#F57C00);border:none;
+            border-radius:12px;padding:10px 16px;min-height:44px;font-size:13px;font-weight:700;
+            color:white;cursor:pointer;font-family:inherit;white-space:nowrap;
+            box-shadow:0 4px 12px rgba(255,143,0,0.4);letter-spacing:0.01em;">🍺 Beer?</button>
+        </div>
+      </div>
+      <div class="audit-opts" id="q2opts">
+        <button class="audit-opt" data-val="0" onclick="Audit.pick(2,0)"><span class="audit-badge">0</span>1 or 2 pegs<span class="audit-hint">30–60ml</span></button>
+        <button class="audit-opt" data-val="1" onclick="Audit.pick(2,1)"><span class="audit-badge">1</span>3 or 4 pegs<span class="audit-hint">90–120ml</span></button>
+        <button class="audit-opt" data-val="2" onclick="Audit.pick(2,2)"><span class="audit-badge">2</span>5 or 6 pegs<span class="audit-hint">150–180ml</span></button>
+        <button class="audit-opt" data-val="3" onclick="Audit.pick(2,3)"><span class="audit-badge">3</span>7 to 9 pegs<span class="audit-hint">210–270ml</span></button>
+        <button class="audit-opt" data-val="4" onclick="Audit.pick(2,4)"><span class="audit-badge">4</span>10 or more pegs<span class="audit-hint">300ml+</span></button>
+      </div>
+    </div>
+    <div id="auditStep3" style="display:none">
+      <div class="audit-q">How often do you have 6+ pegs in one go?</div>
+      <div class="audit-q-hi">एक बार में 6 या अधिक पेग कितनी बार?</div>
+      <div class="audit-def">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <div class="audit-def-title">6 pegs = 180ml whisky</div>
+            <div class="audit-def-sub">6 पेग = 180ml व्हिस्की · heavy session</div>
+          </div>
+          <button onclick="document.getElementById('beerInfoModal').classList.add('open')"
+            style="flex-shrink:0;background:linear-gradient(135deg,#FF8F00,#F57C00);border:none;
+            border-radius:12px;padding:10px 16px;min-height:44px;font-size:13px;font-weight:700;
+            color:white;cursor:pointer;font-family:inherit;white-space:nowrap;
+            box-shadow:0 4px 12px rgba(255,143,0,0.4);letter-spacing:0.01em;">🍺 Beer?</button>
+        </div>
+      </div>
+      <div class="audit-opts" id="q3opts">
+        <button class="audit-opt" data-val="0" onclick="Audit.pick(3,0)"><span class="audit-badge">0</span>Never<span class="audit-hint">कभी नहीं</span></button>
+        <button class="audit-opt" data-val="1" onclick="Audit.pick(3,1)"><span class="audit-badge">1</span>Less than monthly<span class="audit-hint">साल में कुछ बार</span></button>
+        <button class="audit-opt" data-val="2" onclick="Audit.pick(3,2)"><span class="audit-badge">2</span>Monthly<span class="audit-hint">महीने में एक बार</span></button>
+        <button class="audit-opt" data-val="3" onclick="Audit.pick(3,3)"><span class="audit-badge">3</span>Weekly<span class="audit-hint">हर हफ़्ते</span></button>
+        <button class="audit-opt" data-val="4" onclick="Audit.pick(3,4)"><span class="audit-badge">4</span>Daily or almost daily<span class="audit-hint">रोज़ या लगभग रोज़</span></button>
+      </div>
+    </div>
+    <button class="audit-next" id="auditNextBtn" onclick="Audit.next()">Next →</button>
+  </div>
+</div>
+
+
+<!-- BEER INFO MODAL -->
+<div class="modal-backdrop" id="beerInfoModal" style="z-index:2000;">
+  <div class="modal-box" style="max-width:340px;">
+    <div class="modal-body" style="text-align:left;padding:20px 20px 8px;">
+      <div style="font-size:17px;font-weight:700;color:var(--label);margin-bottom:4px;">🍺 Beer in Pegs</div>
+      <div style="font-size:12px;color:var(--label3);margin-bottom:16px;">1 drink = 1 peg = 30ml whisky = 10g alcohol</div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">Strong Beer — 8%</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,143,0,0.07);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">650ml (large bottle)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--amber);">≈ 4 pegs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,143,0,0.07);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">500ml (pint)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--amber);">≈ 3 pegs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,143,0,0.07);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">330ml (can/bottle)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--amber);">≈ 2 pegs</span>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--label2);margin-bottom:8px;">Regular Beer — 5%</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(60,60,67,0.06);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">650ml (large bottle)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--label2);">≈ 2.5 pegs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(60,60,67,0.06);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">500ml (pint)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--label2);">≈ 2 pegs</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(60,60,67,0.06);border-radius:8px;">
+          <span style="font-size:13px;color:var(--label);">330ml (can/bottle)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--label2);">≈ 1.3 pegs</span>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--label3);font-style:italic;line-height:1.5;">Based on WHO standard drink = 10g pure alcohol. Alcohol density = 0.789g/ml.</div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-actions single">
+      <button class="modal-action bold" onclick="document.getElementById('beerInfoModal').classList.remove('open')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div class="confetti-layer" id="confLayer"></div>
+<div class="toast" id="toast"></div>
+<div id="undoBar" style="position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);
+  background:#1c1c1e;color:white;padding:11px 20px;border-radius:22px;
+  font-size:13px;font-weight:600;z-index:9001;opacity:0;
+  transition:bottom 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s ease;
+  pointer-events:none;display:flex;align-items:center;gap:12px;white-space:nowrap;
+  max-width:calc(100% - 48px);">
+  <span id="undoMsg">Logged</span>
+  <button onclick="App.undo()" style="background:rgba(255,255,255,0.15);border:none;border-radius:10px;
+    padding:5px 12px;font-size:12px;font-weight:700;color:white;cursor:pointer;font-family:inherit;">
+    Undo
+  </button>
+</div>
+
+<!-- D3 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" crossorigin="anonymous"></script>
+<script>
+'use strict';
+
+// ─── CONSTANTS ───────────────────────────────────────
+const MAX_DRINKS   = 10;
+const MS_DAY       = 86400000;
+const STORE_KEY    = 'sj_mvp_v1';
+
+// ─── HELPERS ─────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const dk = d  => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+function daysSince(iso) {
+  const last = new Date(iso);
+  if (isNaN(last)) return 0;
+  const now = new Date();
+  return Math.round((
+    new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
+    new Date(last.getFullYear(), last.getMonth(), last.getDate())
+  ) / MS_DAY);
+}
+
+// ─── STORE ───────────────────────────────────────────
+const Store = {
+  defaults: () => ({
+    attempt:        1,
+    calDay:         1,
+    sober:          0,
+    drinks:         0,
+    streak:         0,
+    bestStreak:     0,
+    bestSober:      0,
+    bestDrinks:     0,
+    todayStatus:    'none',     // none | sober | drink
+    todaySuccessLogged: false,
+    inPB:           false,
+    pbCelebrated:   false,
+    celebStreaks:   {},
+    celebTrophies:  {},
+    trophyCounts:   {},
+    dailyLog:       {},
+    completedJ:     [],
+    pendingReset:   false,
+    lastCheck:      new Date().toISOString(),
+    auditQ1: null, auditQ2: null, auditQ3: null,
+    totalSober:     0,
+    totalDrinks:    0,
+  }),
+
+  load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return this.defaults();
+      return this._fix(JSON.parse(raw));
+    } catch { return this.defaults(); }
+  },
+
+  _t: null,
+  save(d) {
+    clearTimeout(this._t);
+    this._t = setTimeout(() => {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch {}
+    }, 50);
+  },
+
+  _fix(d) {
+    const def = this.defaults();
+    for (const k in def) if (!(k in d)) d[k] = def[k];
+    ['attempt','calDay','sober','drinks','streak','bestStreak','bestSober','bestDrinks'].forEach(k => {
+      d[k] = Math.max(0, parseInt(d[k]) || 0);
+    });
+    if (!d.dailyLog)      d.dailyLog      = {};
+    if (!d.completedJ)    d.completedJ    = [];
+    if (!d.celebStreaks)   d.celebStreaks   = {};
+    if (!d.celebTrophies)  d.celebTrophies  = {};
+    if (!d.trophyCounts)   d.trophyCounts   = {};
+    return d;
+  }
+};
+
+// ─── MILESTONES DATA ─────────────────────────────────
+const STREAKS = [
+  { days:1,  icon:'⚡', label:'Day 1',  full:'Day 1 — First Step',
+    c:{e:'⚡', t:'First Step!', m:"The hardest step is the first.\nYou took it.\n\n🫀 Blood alcohol clearing. Liver beginning to filter."} },
+  { days:3,  icon:'🔥', label:'Day 3',  full:'Day 3 — Breaking Through',
+    c:{e:'🔥', t:'Breaking Through!', m:"3 days. Physical withdrawal easing.\n\n💧 Hydration restoring. Brain producing natural GABA again."} },
+  { days:7,  icon:'🎯', label:'Day 7',  full:'Day 7 — Out of Risk',
+    c:{e:'🎯', t:'Day 7 — Out of Risk!', m:"One full week.\nBy frequency — clinically out of risk.\n\n🧠 Dopamine receptors recovering. Anxiety measurably lower."} },
+  { days:10, icon:'🌟', label:'Day 10', full:'Day 10 — Gaining Ground',
+    c:{e:'🌟', t:'Gaining Ground!', m:"Double digits.\n\n❤️ Blood pressure dropping. Liver enzymes improving."} },
+  { days:14, icon:'🌿', label:'Day 14', full:'Day 14 — Two Weeks',
+    c:{e:'🌿', t:'Two Weeks!', m:"Two weeks. Dopamine system recalibrating.\n\n🌙 REM sleep restored. Energy rising."} },
+  { days:21, icon:'💚', label:'Day 21', full:'Day 21 — Three Weeks',
+    c:{e:'💚', t:'Three Weeks!', m:"21 days of consistency.\n\n🛡️ Immune system stronger. Inflammation reducing."} },
+  { days:28, icon:'🏅', label:'Day 28', full:'Day 28 — One Month',
+    c:{e:'🏅', t:'One Month!', m:"28 days. A full month.\nThe substance is losing its grip.\n\n🫁 Liver function largely restored."} },
+];
+
+const TROPHIES = [
+  { days:5,  icon:'⚡', label:'5 Days',  full:'5 Days — First Win',
+    c:{e:'⚡', t:'First Win!', m:"🗓 5 sober days.\n\nYour first win. For a daily drinker — this may be the longest you've gone in years."} },
+  { days:10, icon:'🌿', label:'10 Days', full:'10 Days — Holding Ground',
+    c:{e:'🌿', t:'Holding Ground!', m:"🗓 10 sober days.\n\nSober days now equal drinking days. You are no longer losing."} },
+  { days:15, icon:'🌟', label:'15 Days', full:'15 Days — Getting Ahead',
+    c:{e:'🌟', t:'Getting Ahead!', m:"🗓 15 sober days.\n\nSober days outnumber drinking days. The tide has turned."} },
+  { days:20, icon:'💪', label:'20 Days', full:'20 Days — Double',
+    c:{e:'💪', t:'Double!', m:"🗓 20 sober days.\n\nTwice as many sober days as drinking days. Your liver is getting the recovery it needs."} },
+  { days:30, icon:'🎯', label:'30 Days', full:'30 Days — Momentum',
+    c:{e:'🎯', t:'Momentum!', m:"🗓 30 sober days.\n\n3 sober days for every drinking day. This is recovery."} },
+  { days:40, icon:'🌱', label:'40 Days', full:'40 Days — In Progress',
+    c:{e:'🌱', t:'In Progress!', m:"🗓 40 sober days.\n\nThis is no longer a struggle. This is becoming who you are."} },
+  // Taking Control — locked until 40 sober days
+  { days:60,  icon:'✨', label:'60 Days',  full:'60 Days — Turning Point',  locked:true,
+    c:{e:'✨', t:'Turning Point!', m:"🗓 60 sober days.\n\nSix sober days for every drinking day. You are approaching every clinical safe limit."} },
+  { days:80,  icon:'🏔️', label:'80 Days',  full:'80 Days — Low Risk',       locked:true,
+    c:{e:'🏔️', t:'Low Risk!', m:"🗓 80 sober days.\n\nYou are drinking less often than most people globally. You control the days. Now control the pour."} },
+  { days:100, icon:'💎', label:'100 Days', full:'100 Days — Occasional Drinker', locked:true,
+    c:{e:'💎', t:'Occasional Drinker!', m:"🗓 100 days.\n\nOccasional drinker by every clinical definition.\n\nThey said quit. You said control. You have conquered."} },
+];
+
+// ─── CONFETTI ────────────────────────────────────────
+function confetti(n=80) {
+  const w = $('confLayer');
+  const cols = ['#4CAF50','#FF8F00','#EF5350','#2196F3','#9C27B0','#FF4081','#FFD600'];
+  let h='';
+  for (let i=0;i<n;i++) {
+    const s=Math.random()*8+5;
+    h+=`<div class="cp" style="left:${Math.random()*100}vw;top:-12px;width:${s}px;height:${s}px;background:${cols[i%cols.length]};animation-duration:${Math.random()*2+1.4}s;animation-delay:${Math.random()*0.7}s;"></div>`;
+  }
+  w.innerHTML=h;
+  setTimeout(()=>w.innerHTML='',4200);
+}
+
+// ─── TOAST ───────────────────────────────────────────
+let _tt;
+function toast(msg) {
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ─── RENDER ──────────────────────────────────────────
+function renderAll(d) {
+  // header + day
+  $('journeyBadge').textContent = `Journey ${d.attempt}`;
+  $('calDay').textContent = d.calDay;
+
+  // score
+  $('scoreSober').textContent = d.sober;
+  $('scoreDrink').textContent = d.drinks;
+  $('soberLabel').textContent = `${d.sober} sober days`;
+  $('drinkLabel').textContent = `${d.drinks} drinking days`;
+
+  // best score — always visible from Day 1
+  const showBest = true;
+  $('bestScore').style.display = 'block';
+  $('bestEmpty').style.display = 'none';
+  $('bestScore').textContent = `${d.bestSober} – ${d.bestDrinks}`;
+
+  // score hero — dim and relabel when journey ended
+  const hero = document.querySelector('.score-hero');
+  if (hero) {
+    hero.classList.toggle('inactive', !!d.pendingReset);
+    const label = hero.querySelector('.score-label');
+    if (label) label.textContent = d.pendingReset ? 'Final Score' : 'Current Journey';
+  }
+
+  // chances
+  const rem = MAX_DRINKS - d.drinks;
+  $('chancesLeft').textContent = rem;
+  $('chancesGrid').innerHTML = Array.from({length:10},(_,i)=>{
+    const used = i >= rem;
+    return `<div class="chance-pip${used?' used':''}"><span>${used?'·':'🥃'}</span></div>`;
+  }).join('');
+
+  // buttons
+  const sb=$('soberBtn'), db=$('drinkBtn');
+  if (d.pendingReset) {
+    sb.disabled=true; sb.innerHTML='Journey Ended'; db.disabled=true;
+  } else if (d.todayStatus==='drink') {
+    sb.disabled=true; sb.classList.remove('logged'); sb.innerHTML='<span class="btn-icon">☀️</span> Still in it.';
+    db.disabled=true; db.classList.add('logged');
+  } else if (d.todayStatus==='sober') {
+    sb.disabled=true; sb.classList.add('logged'); sb.innerHTML='<span class="btn-icon">✓</span> Sober Today';
+    db.disabled=true;
+  } else {
+    sb.disabled=false; sb.classList.remove('logged'); sb.innerHTML='<span class="btn-icon">☀️</span> Did Not Drink';
+    db.disabled=false; db.classList.remove('logged'); db.innerHTML='<span class="btn-icon">🥃</span> I Drank';
+  }
+
+  renderStreaks(d);
+  renderTrophies(d);
+  App.renderEveningBanner(d);
+}
+
+function renderStreaks(d) {
+  const streak  = d.streak;
+  const best    = d.bestStreak;
+  // next unachieved milestone
+  const nextMilestone = STREAKS.find(m => streak < m.days);
+  const nextIdx = nextMilestone ? STREAKS.indexOf(nextMilestone) : -1;
+
+  let html = '';
+  STREAKS.forEach((m, i) => {
+    const achieved = streak >= m.days;
+    const isNext   = i === nextIdx;
+
+    let rowClass  = 'streak-row';
+    let nameClass = 'streak-name';
+    let statClass = 'streak-stat';
+    let stat      = '—';
+    let label     = m.label;
+
+    if (achieved) {
+      rowClass  += ' milestone-active';
+      nameClass += ' done';
+      statClass += ' done';
+      stat       = '✓';
+      label      = m.full;
+    } else if (isNext) {
+      statClass += ' next';
+      stat       = `${m.days - streak}d`;
+    }
+
+    html += `<div class="${rowClass}">
+      <div class="streak-icon">${m.icon}</div>
+      <div class="${nameClass}">${label}</div>
+      <div class="${statClass}">${stat}</div>
+    </div>`;
+  });
+
+  // Personal Best row
+  const pbActive = d.inPB && best > 0;
+  html += `<div class="streak-row${pbActive ? ' pb-row' : ''}">
+    <div class="streak-icon">🏆</div>
+    <div class="streak-name${best > 0 ? ' done' : ''}" style="${pbActive ? 'color:var(--amber);font-weight:700;' : ''}">Personal Best</div>
+    <div class="streak-stat" style="${best > 0 ? 'color:var(--amber);font-weight:700;' : ''}">${best || '—'}</div>
+  </div>`;
+
+  $('streakRows').innerHTML = html;
+}
+
+function renderTrophies(d) {
+  const unlocked = d.sober >= 40 || d.bestSober >= 40;
+  let html = '';
+
+  // Early + Moving Forward milestones (days 5–40)
+  TROPHIES.filter(m => !m.locked).forEach(m => {
+    const done = d.sober >= m.days;
+    const cnt  = d.trophyCounts[m.days] || 0;
+    html += `<div class="trophy-row${done?' active-trophy':''}">
+      <div class="trophy-icon">${m.icon}</div>
+      <div class="trophy-name">${done ? m.full : m.label}</div>
+      <div class="trophy-stat">${done ? (cnt>1?`${cnt}×`:'✓') : '—'}</div>
+    </div>`;
+  });
+
+  // Taking Control stage header
+  html += `<div class="taking-control-label${unlocked?'':' locked-label'}">Taking Control</div>`;
+
+  if (!unlocked) {
+    html += `
+      <div style="position:relative;margin:4px -10px;border-radius:10px;overflow:hidden;">
+        <div style="filter:blur(6px);pointer-events:none;user-select:none;opacity:0.3;">
+          <div class="trophy-row"><div class="trophy-icon">✨</div><div class="trophy-name">60 Days — Turning Point</div><div class="trophy-stat">—</div></div>
+          <div class="trophy-row"><div class="trophy-icon">🏔️</div><div class="trophy-name">80 Days — Low Risk</div><div class="trophy-stat">—</div></div>
+          <div class="trophy-row" style="border-bottom:none;"><div class="trophy-icon">💎</div><div class="trophy-name">100 Days — Occasional Drinker</div><div class="trophy-stat">—</div></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(242,242,247,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+          <div style="font-size:20px;">🔒</div>
+          <div style="font-size:12px;font-weight:700;color:var(--label2);">Reach 40 sober days</div>
+        </div>
+      </div>`;
+  } else {
+    TROPHIES.filter(m => m.locked).forEach(m => {
+      const done = d.sober >= m.days;
+      const cnt  = d.trophyCounts[m.days] || 0;
+      html += `<div class="trophy-row${done?' active-trophy':''}">
+        <div class="trophy-icon">${m.icon}</div>
+        <div class="trophy-name">${done ? m.full : m.label}</div>
+        <div class="trophy-stat">${done ? (cnt>1?`${cnt}×`:'✓') : '—'}</div>
+      </div>`;
+    });
+  }
+
+  $('trophyRows').innerHTML = html;
+}
+
+// ─── APP ─────────────────────────────────────────────
+const App = {
+  d: null,
+  _pendingAction: null,
+  _celebQ: [],
+  _celebrating: false,
+  _undoSnapshot: null,
+  _undoTimer: null,
+
+  init() {
+    this.d = Store.load();
+    this._catchUp();
+    renderAll(this.d);
+    Meter.init();
+    Meter.update(this.d);
+    setInterval(()=>this._checkMidnight(),5000);
+    // Recheck evening banner every minute in case 9pm passes while app is open
+    setInterval(()=>{ if (this.d) this.renderEveningBanner(this.d); }, 60000);
+  },
+
+  _checkMidnight() {
+    const diff = daysSince(this.d.lastCheck);
+    if (diff > 0) this._catchUp();
+  },
+
+  _catchUp() {
+    const d = this.d;
+    const diff = daysSince(d.lastCheck);
+    if (diff <= 0) return;
+
+    if (diff === 1) {
+      if (d.pendingReset) { this._startNew(); return; }
+      d.calDay++;
+      const prev = d.todayStatus;
+      d.todayStatus = 'none';
+      d.lastCheck = new Date().toISOString();
+      Store.save(d);
+      renderAll(d);
+      if (prev === 'none') setTimeout(()=>$('yesterdayModal').classList.add('open'),800);
+    } else {
+      const cap = Math.min(diff, 30);
+      for (let i=0;i<cap;i++) this._advanceDay(true);
+      Store.save(d);
+      renderAll(d);
+    }
+  },
+
+  _advanceDay(batch=false) {
+    const d = this.d;
+    if (d.pendingReset) { this._startNew(); return; }
+    if (d.drinks>=MAX_DRINKS) { this._endJourney(); return; }
+    d.calDay++; d.todayStatus='none'; d.todaySuccessLogged=false;
+    d.lastCheck=new Date().toISOString();
+    if (!batch) { Store.save(d); renderAll(d); }
+  },
+
+  handleSober() {
+    if (this.d.todayStatus!=='none') return;
+    this._pendingAction='sober';
+    $('confirmTitle').textContent='Mark today as sober?';
+    $('confirmMsg').textContent='';
+    $('confirmOkBtn').textContent='Yes, sober ✓';
+    $('confirmModal').classList.add('open');
+  },
+
+  showConfirm(action) {
+    if (action==='drink') {
+      if (this.d.todayStatus!=='none') return;
+      this._pendingAction='drink';
+      $('confirmTitle').textContent='Log a drinking day?';
+      $('confirmMsg').textContent='This uses 1 of your 10 drinking days.';
+      $('confirmOkBtn').textContent='Yes, I drank';
+      $('confirmModal').classList.add('open');
+    }
+  },
+
+  closeConfirm() { $('confirmModal').classList.remove('open'); this._pendingAction=null; },
+
+  doConfirm() {
+    const a=this._pendingAction;
+    this.closeConfirm();
+    $('confirmOkBtn').style.color = '';
+    // Snapshot BEFORE action so undo can restore cleanly
+    if (a==='sober' || a==='drink') {
+      this._undoSnapshot = JSON.parse(JSON.stringify(this.d));
+    }
+    if (a==='sober') { this._doSober(); this._showUndo('Sober day logged'); }
+    else if (a==='drink') { this._doDrink(); this._showUndo('Drinking day logged'); }
+    else if (a==='clearAll') {
+      localStorage.removeItem(STORE_KEY);
+      localStorage.removeItem('sj_onboarded');
+      localStorage.removeItem('sj_whySeen');
+      location.reload();
+    }
+  },
+
+  _doSober() {
+    const d=this.d;
+    const isFirst = d.sober===0 && d.attempt===1;
+    d.dailyLog[dk(new Date())]='sober';
+    d.sober++; d.todayStatus='sober';
+    if (!d.totalSober) d.totalSober=0;
+    d.totalSober++;
+    const prevStreak = d.streak;
+    const willBreakPB = (prevStreak+1)>d.bestStreak && d.bestStreak>0 && !d.pbCelebrated;
+    d.streak++;
+    if (d.streak>d.bestStreak) { d.bestStreak=d.streak; d.inPB=true; }
+    if (willBreakPB) d.pbCelebrated=true;
+    this._updateBest();
+    Store.save(d); renderAll(d);
+    // Always show toast immediately
+    toast(_msg(d.streak, d.sober, d.drinks));
+    track('day_logged', { type:'sober', journey:d.attempt, cal_day:d.calDay, sober:d.sober, drinks:d.drinks, streak:d.streak, chances_left:10-d.drinks });
+    setTimeout(()=>{
+      if (isFirst) { return; } // Day 1 — toast is enough, no modal
+      if (willBreakPB) { confetti(110); this._qCeleb('🏆',`New Best — ${d.streak} Days!`,`You just beat your longest streak (${prevStreak} days).\nUncharted territory. Keep going!`); return; }
+      this._checkTrophies();
+      for (const m of STREAKS) {
+        if (d.streak===m.days && !d.celebStreaks[m.days]) {
+          d.celebStreaks[m.days]=true;
+          Store.save(d);
+          track('milestone_reached', { type:'streak', days:m.days, attempt:d.attempt });
+          confetti(90); this._qCeleb(m.c.e,m.c.t,m.c.m); return;
+        }
+      }
+    },300);
+  },
+
+  _doDrink() {
+    const d=this.d;
+    d.dailyLog[dk(new Date())]='drink';
+    d.drinks++; d.todayStatus='drink';
+    if (!d.totalDrinks) d.totalDrinks=0;
+    d.totalDrinks++;
+    if (d.streak>0) d.streak=0;
+    d.inPB=false; d.pbCelebrated=false; d.celebStreaks={};
+    this._updateBest();
+    if (d.drinks>=MAX_DRINKS) { Store.save(d); renderAll(d); this._endJourney(); return; }
+    Store.save(d); renderAll(d);
+    track('day_logged', { type:'drink', journey:d.attempt, cal_day:d.calDay, sober:d.sober, drinks:d.drinks, streak:d.streak, chances_left:10-d.drinks });
+    setTimeout(()=>$('ackModal').classList.add('open'),200);
+  },
+
+  closeAck() { $('ackModal').classList.remove('open'); },
+
+  logYesterday(status) {
+    $('yesterdayModal').classList.remove('open');
+    const d=this.d;
+    const yest=new Date(); yest.setDate(yest.getDate()-1);
+    const key=dk(yest);
+    if (status==='sober') {
+      d.dailyLog[key]='sober'; d.sober++; d.streak++;
+      if (d.streak>d.bestStreak) { d.bestStreak=d.streak; d.inPB=true; }
+      this._updateBest(); this._checkTrophies();
+    } else {
+      d.dailyLog[key]='drink'; d.drinks++; d.streak=0; d.inPB=false;
+      this._updateBest();
+      if (d.drinks>=MAX_DRINKS) { this._endJourney(); return; }
+    }
+    d.todayStatus='none'; d.lastCheck=new Date().toISOString();
+    Store.save(d); renderAll(d);
+  },
+
+  _endJourney() {
+    const d=this.d;
+    if (d.pendingReset) return;
+    if (!d.completedJ) d.completedJ=[];
+    d.completedJ.push({attempt:d.attempt,sober:d.sober,drinks:d.drinks,date:new Date().toISOString()});
+    d.pendingReset=true;
+    Store.save(d); renderAll(d);
+    track('journey_completed', {
+      attempt:    d.attempt,
+      sober_days: d.sober,
+      drink_days: d.drinks,
+      best_ever:  d.bestSober,
+      is_new_best: d.sober >= d.bestSober
+    });
+
+    // Populate summary modal
+    const isFirst  = d.attempt === 1;
+    const isNewBest= d.sober >= d.bestSober;
+    const gap      = d.bestSober - d.sober;
+
+    $('jEndTitle').textContent    = `Journey ${d.attempt} Complete`;
+    $('jEndSubtitle').textContent  = isFirst ? 'Your first journey.' : isNewBest ? '🏆 New personal best!' : `${gap} day${gap!==1?'s':''} short of your best.`;
+    $('jEndSober').textContent    = d.sober;
+    $('jEndBest').textContent     = Math.max(d.bestSober, d.sober);
+    $('jEndAttempts').textContent = d.completedJ.length;
+    $('jEndTotalSober').textContent = (d.totalSober || d.sober);
+    $('jEndTotalDrink').textContent = (d.totalDrinks || d.drinks);
+
+    const verdict = isFirst
+      ? `Your opening score is ${d.sober}. Journey ${d.attempt+1} starts tomorrow — can you beat it?`
+      : isNewBest
+        ? `New personal best. Journey ${d.attempt+1} starts tomorrow — go further.`
+        : `The record stands at ${d.bestSober}. Journey ${d.attempt+1} — chase it.`;
+    $('jEndVerdict').textContent = verdict;
+    $('jEndBtn').textContent     = `Start Journey ${d.attempt+1} →`;
+
+    setTimeout(()=>$('journeyEndModal').classList.add('open'),400);
+  },
+
+  closeJourneyEnd() { $('journeyEndModal').classList.remove('open'); },
+
+  _startNew() {
+    const d=this.d;
+    d.attempt++; d.sober=0; d.drinks=0; d.streak=0; d.calDay=1;
+    d.todayStatus='none'; d.inPB=false; d.pbCelebrated=false;
+    d.celebStreaks={}; d.celebTrophies={};
+    d.pendingReset=false;
+    d.lastCheck=new Date().toISOString();
+    Store.save(d); renderAll(d);
+    track('journey_started', { attempt: d.attempt });
+  },
+
+  _updateBest() {
+    const d=this.d;
+    if (d.sober>d.bestSober||(d.sober===d.bestSober&&d.drinks<d.bestDrinks)) {
+      d.bestSober=d.sober; d.bestDrinks=Math.min(d.drinks,MAX_DRINKS);
+    }
+  },
+
+  _checkTrophies() {
+    const d=this.d;
+    for (const m of TROPHIES) {
+      if (d.sober===m.days && !d.celebTrophies[m.days]) {
+        d.trophyCounts[m.days]=(d.trophyCounts[m.days]||0)+1;
+        d.celebTrophies[m.days]=true;
+        Store.save(d);
+        track('milestone_reached', { type:'journey', days:m.days, attempt:d.attempt });
+        confetti(100); this._qCeleb(m.c.e,m.c.t,m.c.m);
+        // Unlock celebration fires after trophy celebration
+        if (m.days===40) {
+          setTimeout(()=>this._qCeleb('🔓','Taking Control Unlocked!','40 sober days.\n\nMilestones 60, 80, and 100 are now visible.\n\nKeep climbing.'), 400);
+        }
+      }
+    }
+  },
+
+  _qCeleb(e,t,m) {
+    this._celebQ.push({e,t,m});
+    if (!this._celebrating) this._showNextCeleb();
+  },
+
+  _showUndo(msg) {
+    const bar = $('undoBar');
+    $('undoMsg').textContent = msg;
+    bar.style.bottom = 'calc(72px + env(safe-area-inset-bottom))';
+    bar.style.opacity = '1';
+    bar.style.pointerEvents = 'all';
+    clearTimeout(this._undoTimer);
+    this._undoTimer = setTimeout(() => this._hideUndo(), 5000);
+  },
+
+  _hideUndo() {
+    const bar = $('undoBar');
+    bar.style.bottom = '-80px';
+    bar.style.opacity = '0';
+    bar.style.pointerEvents = 'none';
+  },
+
+  undo() {
+    if (!this._undoSnapshot) return;
+    clearTimeout(this._undoTimer);
+    this._hideUndo();
+    track('undo_used', { undone_action: this.d.todayStatus });
+    this.d = this._undoSnapshot;
+    this._undoSnapshot = null;
+    this._celebQ = [];
+    this._celebrating = false;
+    // Close any open modals
+    ['ackModal','celebModal','confirmModal'].forEach(id => $(`${id}`).classList.remove('open'));
+    Store.save(this.d);
+    renderAll(this.d);
+    toast('Undone ↩');
+  },
+
+  _showNextCeleb() {
+    if (!this._celebQ.length) { this._celebrating=false; return; }
+    this._celebrating=true;
+    const {e,t,m}=this._celebQ.shift();
+    $('celebEmoji').textContent=e; $('celebTitle').textContent=t; $('celebMsg').textContent=m;
+    $('celebModal').classList.add('open');
+  },
+
+  closeCeleb() {
+    $('celebModal').classList.remove('open');
+    setTimeout(()=>this._showNextCeleb(),200);
+  },
+
+  renderEveningBanner(d) {
+    const banner = $('eveningBanner');
+    if (!banner) return;
+    const hour = new Date().getHours();
+    const notLogged = d.todayStatus === 'none';
+    const isEvening = hour >= 21 && hour <= 23; // 9pm–midnight only
+    const show = notLogged && isEvening && !d.pendingReset;
+    banner.style.display = show ? 'block' : 'none';
+  },
+
+  quickLog(type) {
+    if (this.d.todayStatus !== 'none') return;
+    track('evening_banner_used', { type });
+    if (type === 'sober') {
+      this._undoSnapshot = JSON.parse(JSON.stringify(this.d));
+      this._doSober();
+      this._showUndo('Sober day logged');
+    } else {
+      this._undoSnapshot = JSON.parse(JSON.stringify(this.d));
+      this._doDrink();
+      this._showUndo('Drinking day logged');
+    }
+    $('eveningBanner').style.display = 'none';
+  },
+
+  tab(idx,btn) {
+    document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+    document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  },
+
+  clearAll() {
+    this._pendingAction = 'clearAll';
+    $('confirmTitle').textContent = 'Clear all data?';
+    $('confirmMsg').textContent = 'This cannot be undone.';
+    $('confirmOkBtn').textContent = 'Clear';
+    $('confirmOkBtn').style.color = 'var(--red)';
+    $('confirmModal').classList.add('open');
+  }
+};
+
+// ─── DAILY MESSAGE ────────────────────────────────────
+function _msg(streak, sober, drinks) {
+  const FACTS = {
+    1: 'Day 1 logged. Journey started. Come back tomorrow.',
+    2: 'Day 2. Alcohol has cleared your bloodstream. Your body is already recovering.',
+    3: 'Day 3. Blood alcohol is zero. Liver enzymes already improving.',
+    4: 'Day 4. Sleep architecture is repairing. REM sleep returning to normal.',
+    5: 'Day 5. Blood pressure dropping measurably. Heart working less hard.',
+    6: 'Day 6. Most people quit by now. You did not. That gap is everything.',
+    8: 'Day 8. Dehydration reversing. Brain fog lifting. You will notice the clarity.',
+    9: 'One day from Day 10. Do not stop now. You are so close.',
+    11: 'Day 11. Liver is actively repairing damaged cells. The science is on your side.',
+    12: 'Day 12. Anxiety and irritability from withdrawal — gone by now. Your baseline is rising.',
+    13: 'Day 13. Two weeks tomorrow. Immune system measurably stronger.',
+    15: 'Day 15. More sober days than drinking days this journey. You are ahead.',
+    16: 'Day 16. Skin hydration improving. Inflammation reducing. It shows.',
+    17: 'Day 17. Gut microbiome recovering. Digestion normalising.',
+    18: 'Day 18. Three weeks in two days. The habit is forming underneath the surface.',
+    19: 'Day 19. Dopamine system recalibrating. Natural pleasure returning.',
+    22: 'Day 22. Three weeks done. Brain neuroplasticity actively rewiring.',
+    23: 'Day 23. Cholesterol levels improving. Heart disease risk dropping.',
+    25: 'Day 25. Cognitive function measurably sharper than when you started.',
+    26: 'Day 26. Almost a month. Liver fat content reducing significantly.',
+    27: 'Day 27. Three days from Day 30. One of the hardest milestones. You are almost there.',
+    29: 'Day 29. Tomorrow is Day 30. One month. Do not stop tonight.',
+  };
+  if (FACTS[streak]) return FACTS[streak];
+  if (drinks>0) {
+    const r=Math.floor(sober/drinks);
+    const pr=Math.floor((sober-1)/drinks);
+    if (r!==pr) {
+      if (r===2) return `${sober} sober, ${drinks} drinking. You are winning.`;
+      if (r===3) return `${sober} sober, ${drinks} drinking. Keep going.`;
+      if (r>=4) return `${sober} sober, ${drinks} drinking. This is becoming who you are.`;
+    }
+  }
+  const fallback=[
+    'One more day won. Quietly unstoppable.',
+    'Streak alive. Keep it.',
+    'Every sober day compounds.',
+    'You showed up. That is the whole game.',
+    'Steady. Strong. Unbroken.',
+  ];
+  return fallback[streak%fallback.length];
+}
+
+// ─── METER ───────────────────────────────────────────
+const Meter = {
+  ready: false, raf: null,
+  cur: 0, target: 0, zoneIdx: -1,
+
+  ZONES:[
+    {l:'Sober',     s:'Best possible',      color:'#1a7a34', min:0,  max:1  },
+    {l:'Low Risk',  s:'Your target',         color:'#4CAF50', min:1,  max:4  },
+    {l:'Hazardous', s:'Risk rising',         color:'#FF8F00', min:4,  max:6  },
+    {l:'Harmful',   s:'Body at risk',        color:'#EF5350', min:6,  max:9  },
+    {l:'Dependent', s:'See a doctor',        color:'#7b0000', min:9,  max:12 },
+  ],
+
+  zoneOf(sc) {
+    for (let i=this.ZONES.length-1;i>=0;i--) if(sc>=this.ZONES[i].min) return i;
+    return 0;
+  },
+
+  angleOf(sc) {
+    if(sc>=12) return -90; if(sc<=0) return 82.5;
+    return 90-(sc/12)*180-7.5;
+  },
+
+  init() {
+    if (this.ready || typeof d3==='undefined') return;
+    this.ready=true;
+    const CX=150,CY=158,IN=76,OUT=135,GAP=0.015,STEPS=20;
+    const DEG=Math.PI/12;
+    const svg=d3.select('#meterSvg');
+    const g=svg.append('g').attr('transform',`translate(${CX},${CY})`);
+    const arc=d3.arc().innerRadius(IN).outerRadius(OUT).cornerRadius(0);
+    this.ZONES.forEach(z=>{
+      z.end=Math.PI/2-z.min*DEG; z.start=Math.PI/2-z.max*DEG; z.mid=(z.start+z.end)/2;
+    });
+    this.ZONES.forEach((z,i)=>{
+      const s0=z.start+(i===this.ZONES.length-1?0:GAP/2);
+      const s1=z.end-(i===0?0:GAP/2);
+      if(i===0){ g.append('path').attr('d',arc({startAngle:s0,endAngle:s1})).attr('fill',z.color); return; }
+      const GRAD=[[  '#88EE55','#1a7a34'],[  '#FFDD88','#cc6600'],[  '#FF8866','#cc1100'],[  '#cc2200','#550000']];
+      const[cA,cB]=GRAD[i-1]||[z.color,z.color];
+      const span=s1-s0;
+      for(let s=0;s<STEPS;s++){
+        const start=s0+s*(span/STEPS), end=s0+(s+1)*(span/STEPS),t=s/(STEPS-1);
+        const col=i<=1?lerpC(cA,cB,t):lerpC(cA,cB,1-t);
+        g.append('path').attr('d',arc({startAngle:start,endAngle:end})).attr('fill',col);
+      }
+    });
+    const RANGES=['0','1–3','4–5','6–8','9–12'];
+    this.ZONES.forEach((z,i)=>{
+      const mid=z.mid, lr=OUT+16;
+      const lx=(lr*Math.sin(mid)).toFixed(1);
+      const ly1=(-lr*Math.cos(mid)-9).toFixed(1);
+      const ly3=(-lr*Math.cos(mid)+9).toFixed(1);
+      const anch=mid<-0.26?'end':mid>0.26?'start':'middle';
+      const isLow=z.l==='Low Risk';
+      [['none','white',isLow?'4':'3.5'],[z.color,'none','0']].forEach(([fill,stroke,sw])=>{
+        g.append('text').attr('x',lx).attr('y',ly1).attr('text-anchor',anch).attr('dominant-baseline','middle')
+          .attr('font-size',isLow?'11px':'9px').attr('font-weight','800').attr('font-family','-apple-system,sans-serif')
+          .attr('fill',fill).attr('stroke',stroke).attr('stroke-width',sw).attr('stroke-linejoin','round').text(z.l);
+      });
+      [['none','white','2.5'],[z.color,'none','0']].forEach(([fill,stroke,sw])=>{
+        g.append('text').attr('x',lx).attr('y',ly3).attr('text-anchor',anch).attr('dominant-baseline','middle')
+          .attr('font-size',isLow?'8.5px':'6.5px').attr('font-weight',isLow?'700':'400')
+          .attr('font-style','italic').attr('font-family','-apple-system,sans-serif')
+          .attr('fill',fill).attr('stroke',stroke).attr('stroke-width',sw)
+          .attr('stroke-linejoin','round').attr('opacity',isLow?'0.9':'0.65').text(`(${z.s})`);
+      });
+    });
+    g.append('line').attr('id','mN').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',-(IN-8))
+      .attr('stroke','#9E9E9E').attr('stroke-width',2.5).attr('stroke-linecap','round');
+    g.append('text').attr('id','mSc').attr('x',0).attr('y',-24).attr('text-anchor','middle')
+      .attr('font-size','28px').attr('font-weight','800').attr('font-family','-apple-system,sans-serif')
+      .attr('fill','#BDBDBD').text('—');
+    g.append('circle').attr('r',10).attr('fill','white').attr('stroke','#9E9E9E').attr('stroke-width',2).attr('id','mHR');
+    g.append('circle').attr('r',4).attr('fill','#9E9E9E').attr('id','mHD');
+  },
+
+  _apply(angle) {
+    const col=this.zoneIdx>=0?this.ZONES[this.zoneIdx].color:'#9E9E9E';
+    d3.select('#mN').attr('transform',`rotate(${angle})`).attr('stroke',col);
+    d3.select('#mHR').attr('stroke',col); d3.select('#mHD').attr('fill',col);
+  },
+
+  _anim() {
+    const diff=this.target-this.cur;
+    if(Math.abs(diff)<0.3){this.cur=this.target;this._apply(this.cur);return;}
+    this.cur+=diff*0.1; this._apply(this.cur);
+    this.raf=requestAnimationFrame(()=>this._anim());
+  },
+
+  moveTo(sc) {
+    this.zoneIdx=this.zoneOf(sc); this.target=this.angleOf(sc);
+    cancelAnimationFrame(this.raf); this.raf=requestAnimationFrame(()=>this._anim());
+    const z=this.ZONES[this.zoneIdx];
+    d3.select('#mSc').text(sc).attr('fill',z.color);
+  },
+
+  update(d) {
+    if(!this.ready) this.init();
+    if(d.auditQ1===null||d.auditQ2===null||d.auditQ3===null) return;
+    const sc=d.auditQ1+d.auditQ2+d.auditQ3;
+    this.moveTo(sc);
+    const fb=$('meterFeedback');
+    const z=this.ZONES[this.zoneOf(sc)];
+    const MSGS={
+      'Sober':     {bg:'rgba(26,122,52,0.07)',  b:'#1a7a34', c:'#1a7a34',  t:'No alcohol use. Best possible zone.'},
+      'Low Risk':  {bg:'rgba(76,175,80,0.07)',  b:'#4CAF50', c:'#248a3d',  t:'Low Risk — not zero risk. Less is always better.'},
+      'Hazardous': {bg:'rgba(255,143,0,0.07)',  b:'#FF8F00', c:'#cc6600',  t:'Alcohol is affecting your body. Reducing frequency or quantity gets you to Low Risk.'},
+      'Harmful':   {bg:'rgba(239,83,80,0.07)',  b:'#EF5350', c:'#cc2200',  t:'Alcohol is actively damaging your body. Doctor\'s support is recommended.'},
+      'Dependent': {bg:'rgba(123,0,0,0.07)',    b:'#7b0000', c:'#7b0000',  t:'Do not stop suddenly — this is medically dangerous. Please see a doctor first.'},
+    };
+    const info=MSGS[z.l]||MSGS['Low Risk'];
+    fb.style.display='block';
+    fb.style.background=info.bg;
+    fb.style.borderLeft=`3px solid ${info.b}`;
+    fb.style.color=info.c;
+    fb.innerHTML=`<strong>${z.l}.</strong> ${info.t}`;
+
+    // Why this zone — body impact expandable
+    const zoneName   = z.l;
+    const zoneDetail = ZONE_DETAILS[zoneName];
+    const whyWrap    = $('whyZoneWrap');
+    const whyContent = $('whyZoneContent');
+    const whyArrow   = $('whyZoneArrow');
+    if (whyWrap && whyContent && zoneDetail) {
+      const isFirstTime = !localStorage.getItem('sj_whySeen');
+      whyWrap.style.display = 'block';
+      whyContent.style.display = 'none';
+      if (whyArrow) whyArrow.textContent = '▸';
+
+      // Add NEW badge and pulse on first appearance
+      const btn = $('whyZoneBtn');
+      if (btn) {
+        // Remove old badge if any
+        const oldBadge = btn.querySelector('.why-new-badge');
+        if (oldBadge) oldBadge.remove();
+        if (isFirstTime) {
+          const badge = document.createElement('span');
+          badge.className = 'why-new-badge';
+          badge.textContent = 'NEW';
+          badge.style.cssText = 'background:#EF5350;color:white;font-size:9px;font-weight:800;border-radius:4px;padding:2px 5px;letter-spacing:0.05em;margin-left:6px;vertical-align:middle;';
+          const labelSpan = btn.querySelector('span > span:last-child');
+          if (labelSpan) labelSpan.appendChild(badge);
+          // Pulse 3 times
+          btn.style.animation = 'whyPulse 0.6s ease 0.5s 3';
+        }
+      }
+
+      const rows = zoneDetail.items.map(item =>
+        `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(60,60,67,0.06);">
+          <div style="font-size:16px;flex-shrink:0;width:22px;text-align:center;">${item.organ}</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:${zoneDetail.color};margin-bottom:2px;">${item.system}</div>
+            <div style="font-size:12px;color:var(--label);line-height:1.5;">${item.impact}</div>
+            ${item.cite ? `<div style="font-size:10px;color:rgba(60,60,67,0.35);margin-top:2px;">📄 ${item.cite}</div>` : ''}
+          </div>
+        </div>`
+      ).join('');
+      whyContent.style.background   = zoneDetail.bg;
+      whyContent.style.padding      = '4px 10px';
+      whyContent.innerHTML          = rows;
+    }
+  }
+};
+
+function lerpC(h1,h2,t) {
+  const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const [r1,g1,b1]=p(h1),[r2,g2,b2]=p(h2);
+  return `rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
+}
+
+// ─── AUDIT ───────────────────────────────────────────
+const Audit = {
+  ans:[null,null,null], step:1,
+  Q3MAX:[0,2,3,3,4],
+
+  show() {
+    this.ans=[null,null,null]; this.step=1;
+    ['q1opts','q2opts','q3opts'].forEach(id=>
+      $(`${id}`).querySelectorAll('.audit-opt').forEach(b=>{
+        b.classList.remove('selected'); b.disabled=false; b.style.opacity='1';
+        const badge=b.querySelector('.audit-badge');
+        if(badge) badge.removeAttribute('style');
+      })
+    );
+    this._showStep(1); this._setBtn(false,'Next →');
+    const rt=$('auditRunning'); if(rt){rt.textContent='0';rt.style.color='var(--label)';}
+    $('auditBackdrop').classList.add('open');
+  },
+
+  pick(step,val) {
+    this.ans[step-1]=val;
+    $(`q${step}opts`).querySelectorAll('.audit-opt').forEach(b=>
+      b.classList.toggle('selected',parseInt(b.dataset.val)===val)
+    );
+    const isLast=(step===1&&val===0)||step===3;
+    this._setBtn(true, isLast?'See My Score →':'Next →');
+
+    // update running total — color reflects zone
+    const total = this.ans.reduce((s,v)=>s+(v||0),0);
+    const anyAnswered = this.ans.some(v => v !== null);
+    const zoneColor = !anyAnswered ? 'var(--label3)'
+      : total===0 ? 'var(--green-deep)'
+      : total<=3  ? 'var(--green-light)'
+      : total<=5  ? 'var(--amber)'
+      : total<=8  ? '#EF5350'
+      : '#7b0000';
+    const rt=$('auditRunning');
+    if(rt) { rt.textContent=total; rt.style.color=zoneColor; rt.style.fontWeight='800'; }
+
+    // reset all badges first
+    $(`q${step}opts`).querySelectorAll('.audit-opt').forEach(b=>{
+      const badge=b.querySelector('.audit-badge');
+      if(badge) badge.removeAttribute('style');
+    });
+
+    // float badge — neutral dark, just confirms the tap
+    const selectedBtn=$(`q${step}opts`).querySelector(`.audit-opt[data-val="${val}"]`);
+    if(selectedBtn) {
+      const rect=selectedBtn.getBoundingClientRect();
+      const float=document.createElement('div');
+      float.className='score-float';
+      float.textContent= val===0?'+0':`+${val}`;
+      float.style.left=`${rect.left+rect.width/2}px`;
+      float.style.top=`${rect.top+4}px`;
+      float.style.color='var(--label)';
+      float.style.fontSize=val===0?'22px':val<=2?'28px':'34px';
+      document.body.appendChild(float);
+      setTimeout(()=>float.remove(),800);
+
+      // scale pulse only
+      const badge=selectedBtn.querySelector('.audit-badge');
+      if(badge) {
+        badge.removeAttribute('style');
+        if(val>0) {
+          badge.style.transition='transform 0.15s ease';
+          badge.style.transform='scale(1.4)';
+          setTimeout(()=>badge.removeAttribute('style'),180);
+        }
+      }
+    }
+  },
+
+  next() {
+    if(this.ans[this.step-1]===null) return;
+    if(this.step===1&&this.ans[0]===0){
+      this.ans[1]=0;this.ans[2]=0;this._save();return;
+    }
+    if(this.step<3){
+      this.step++;
+      this._showStep(this.step);
+      if(this.step===3) this._filterQ3();
+      this._setBtn(false,this.step===3?'See My Score →':'Next →');
+    } else { this._save(); }
+  },
+
+  _filterQ3() {
+    const max=this.Q3MAX[this.ans[0]]??4;
+    $('q3opts').querySelectorAll('.audit-opt').forEach(b=>{
+      const v=parseInt(b.dataset.val),bl=v>max;
+      b.disabled=bl; b.style.opacity=bl?'0.25':'1'; if(bl) b.classList.remove('selected');
+    });
+  },
+
+  _showStep(s) {
+    [1,2,3].forEach(i=>{
+      $(`auditStep${i}`).style.display=i===s?'block':'none';
+      $(`sdot${i}`).classList.toggle('on',i<=s);
+    });
+  },
+
+  _setBtn(en,label) {
+    const b=$('auditNextBtn');
+    b.textContent=label; b.style.opacity=en?'1':'0.35'; b.style.cursor=en?'pointer':'default';
+  },
+
+  _save() {
+    const d=Store.load();
+    const isRetake = d.auditQ1 !== null;
+    [d.auditQ1,d.auditQ2,d.auditQ3]=this.ans;
+    Store.save(d);
+    App.d=d;
+    $('auditBackdrop').classList.remove('open');
+    Meter.update(d);
+    const score = this.ans[0]+this.ans[1]+this.ans[2];
+    const zones = ['Sober','Low Risk','Hazardous','Harmful','Dependent'];
+    const zoneIdx = score===0?0:score<=3?1:score<=5?2:score<=8?3:4;
+    track('audit_completed', {
+      score,
+      zone:    zones[zoneIdx],
+      q1:      this.ans[0],
+      q2:      this.ans[1],
+      q3:      this.ans[2],
+      retake:  isRetake
+    });
+  }
+};
+
+// ─── D3 POLL ─────────────────────────────────────────
+let _d3tries=0;
+const _d3poll=setInterval(()=>{
+  _d3tries++;
+  if(typeof d3!=='undefined'){
+    Meter.init(); Meter.update(App.d);
+    clearInterval(_d3poll);
+  }
+  if(_d3tries>=20) clearInterval(_d3poll);
+},500);
+
+// ─── ONBOARDING ──────────────────────────────────────
+const Ob = {
+  cur: 0,
+  next() {
+    if (this.cur === 0) {
+      const s0 = document.getElementById('ob-slide-0');
+      const s1 = document.getElementById('ob-slide-1');
+      const d0 = document.getElementById('ob-dot-0');
+      const d1 = document.getElementById('ob-dot-1');
+      s0.style.animation = 'slideOutLeft 0.22s ease forwards';
+      setTimeout(() => {
+        s0.style.display = 'none';
+        s1.style.display = 'block';
+        s1.style.animation = 'slideInRight 0.25s ease forwards';
+        d0.style.cssText = 'width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s ease;';
+        d1.style.cssText = 'width:24px;height:8px;border-radius:4px;background:white;transition:all 0.3s ease;';
+        document.getElementById('obNextBtn').textContent = 'Start →';
+      }, 210);
+      this.cur = 1;
+    } else {
+      this.skip();
+    }
+  },
+  skip() {
+    track('onboarding_completed', { skipped: this.cur === 0, slide_reached: this.cur + 1 });
+    localStorage.setItem('sj_onboarded','1');
+    const ob = document.getElementById('onboarding');
+    ob.style.transition = 'opacity 0.4s ease';
+    ob.style.opacity = '0';
+    setTimeout(() => ob.style.display = 'none', 400);
+  }
+};
+
+// ─── ZONE DETAILS ────────────────────────────────────
+const ZONE_DETAILS = {
+  'Sober': {
+    color: '#1a7a34', bg: 'rgba(26,122,52,0.06)',
+    items: [
+      { organ:'🫀', system:'Heart',       impact:'Blood pressure at natural baseline. No alcohol-related cardiac stress.' },
+      { organ:'🧠', system:'Brain',       impact:'Natural dopamine and serotonin balance. No alcohol-induced cognitive suppression.' },
+      { organ:'🫁', system:'Liver',       impact:'Liver enzymes within normal range. Zero alcohol processing load.' },
+      { organ:'🛡️', system:'Cancer risk', impact:'Lowest possible alcohol-attributable cancer risk across all organ systems.', cite:'IARC Monographs Vol. 100E, WHO' },
+    ]
+  },
+  'Low Risk': {
+    color: '#248a3d', bg: 'rgba(52,199,89,0.06)',
+    items: [
+      { organ:'🫀', system:'Heart',      impact:'Minimal additional cardiovascular risk at this frequency. Blood pressure marginally elevated on drinking days.', cite:'Ronksley et al., BMJ 2011' },
+      { organ:'🧠', system:'Brain',      impact:'No measurable long-term cognitive impairment. Mild short-term suppression on drinking occasions.' },
+      { organ:'🫁', system:'Liver',      impact:'Liver processing alcohol efficiently at this level. No clinically significant enzyme elevation.' },
+      { organ:'⚠️', system:'Important',  impact:'No level of alcohol is completely safe. Low Risk means lower risk — not zero risk.', cite:'WHO Global Status Report, 2023' },
+    ]
+  },
+  'Hazardous': {
+    color: '#cc6600', bg: 'rgba(255,149,0,0.06)',
+    items: [
+      { organ:'🫀', system:'Heart',    impact:'Clinically significant blood pressure elevation. Risk of atrial fibrillation increases at this level.', cite:'Biddinger et al., JAMA 2022' },
+      { organ:'🧠', system:'Brain',    impact:'Measurable reduction in brain grey matter volume. Memory and executive function impaired.', cite:'Topiwala et al., BMJ 2017' },
+      { organ:'🫁', system:'Liver',    impact:'Elevated liver enzymes. Early fatty liver (steatosis) begins at this level.', cite:'Naveau et al., Hepatology 1994' },
+      { organ:'🛡️', system:'Cancer',  impact:'Risk of colorectal, breast, mouth and oesophageal cancers measurably elevated.', cite:'IARC Monographs Vol. 100E, WHO' },
+    ]
+  },
+  'Harmful': {
+    color: '#cc2200', bg: 'rgba(255,59,48,0.06)',
+    items: [
+      { organ:'🫀', system:'Heart',    impact:'Alcoholic cardiomyopathy risk. Sustained blood pressure elevation.', cite:'Guzzo-Merello et al., World J Cardiol 2014' },
+      { organ:'🧠', system:'Brain',    impact:'Progressive brain volume loss. Clinically significant memory impairment. Major depression confirmed.', cite:'Oscar-Berman & Marinković, Alcohol Res Health 2007' },
+      { organ:'🫁', system:'Liver',    impact:'Alcoholic hepatitis risk. Liver fibrosis confirmed in biopsy studies.', cite:'Lackner et al., J Hepatol 2017' },
+      { organ:'🛡️', system:'Cancer',  impact:'Significantly elevated risk of liver, colorectal, breast and oropharyngeal cancers.', cite:'IARC Monographs Vol. 100E, WHO' },
+    ]
+  },
+  'Dependent': {
+    color: '#7b0000', bg: 'rgba(123,0,0,0.06)',
+    items: [
+      { organ:'🫀', system:'Heart',      impact:'Dilated cardiomyopathy. Significantly elevated risk of stroke and sudden cardiac death.', cite:'Piano, Alcohol Res 2017' },
+      { organ:'🧠', system:'Brain',      impact:'Wernicke-Korsakoff syndrome risk. Permanent memory loss possible. Structural brain atrophy on MRI.', cite:'Thomson et al., Alcohol Alcohol 2012' },
+      { organ:'🫁', system:'Liver',      impact:'Alcoholic cirrhosis risk. Liver failure in long-term dependent drinkers.', cite:'Rehm et al., Lancet 2017' },
+      { organ:'⚡', system:'Withdrawal', impact:'Abrupt cessation causes seizures and delirium tremens — life-threatening without medical support.', cite:'Bayard et al., Am Fam Physician 2004' },
+    ]
+  },
+};
+
+function toggleWhyZone() {
+  const content  = $('whyZoneContent');
+  const arrow    = $('whyZoneArrow');
+  const btn      = $('whyZoneBtn');
+  if (!content) return;
+  const isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▸' : '▾';
+  if (btn) {
+    btn.style.animation = '';
+    btn.style.boxShadow = isOpen ? '0 2px 8px rgba(0,0,0,0.07)' : '0 3px 12px rgba(0,0,0,0.1)';
+    // Remove NEW badge and mark seen
+    const badge = btn.querySelector('.why-new-badge');
+    if (badge) badge.remove();
+    localStorage.setItem('sj_whySeen', '1');
+  }
+}
+
+// ─── ANALYTICS ───────────────────────────────────────
+// Safe wrapper — never throws if PostHog fails to load
+function track(event, props) {
+  try { if (window.posthog) posthog.capture(event, props); } catch(e) {}
+}
+
+// ─── BOOT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+  // Track app open
+  const d = App.d;
+  track('app_opened', {
+    journey:      d.attempt,
+    cal_day:      d.calDay,
+    today_logged: d.todayStatus !== 'none',
+    sober:        d.sober,
+    drinks:       d.drinks,
+    streak:       d.streak
+  });
+  const isOnboarded = !!localStorage.getItem('sj_onboarded');
+  if (isOnboarded) {
+    // Returning user — hide onboarding and splash immediately
+    document.getElementById('onboarding').style.display = 'none';
+    const splash = document.getElementById('splashOverlay');
+    if (splash) splash.style.display = 'none';
+  } else {
+    // New user — show splash then onboarding
+    setTimeout(() => {
+      const splash = document.getElementById('splashOverlay');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => { if(splash) splash.style.display = 'none'; }, 400);
+      }
+    }, 1200);
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+});
+</script>
+</body>
+</html>
