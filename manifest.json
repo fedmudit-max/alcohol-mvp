@@ -4,13 +4,13 @@
   "description": "Track and control your alcohol consumption. One journey at a time.",
   "lang": "en",
   "dir": "ltr",
-  "start_url": "/?source=pwa",
+  "start_url": "./?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#1e9e3e",
   "theme_color": "#1e9e3e",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
